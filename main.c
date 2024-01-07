@@ -43,15 +43,19 @@ int splitCmds(const char input[], char* allCmds[]){
                 strncpy(allCmds[numCmds], input + i - numChars, numChars);
                 allCmds[numCmds][numChars] = '\0';
             }
+            numChars = 0, numCmds++;
         }
         else { // if input[i] is either " or ', search ahead until the closing " or ', and copy it over without splitting the & and ;.
             do i++, numChars++; // Need to do this once before.
             while(input[i] != '\0' && input[i] != '\"' && input[i] != '\'');
-            allCmds[numCmds] = malloc((numChars+3) * sizeof(char));
-            strncpy(allCmds[numCmds], input + i - numChars, numChars + 1);
-            allCmds[numCmds][numChars+1] = '\0';
+            numChars++; // To count the quote as an additional char.
+            if(input[i+1] == '\0'){ // Only in the case where the quotes mark the end of the command.
+                allCmds[numCmds] = malloc((numChars+3) * sizeof(char));
+                strncpy(allCmds[numCmds], input + i - numChars, numChars + 1);
+                allCmds[numCmds][numChars+1] = '\0';
+                numCmds++;
+            }
         }
-        numChars = 0, numCmds++;
     }
 
     return numCmds;
