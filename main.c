@@ -51,7 +51,7 @@ int splitCmds(const char input[], char* allCmds[]){
             numChars++; // To count the quote as an additional char.
             if(input[i+1] == '\0'){ // Only in the case where the quotes mark the end of the command.
                 allCmds[numCmds] = malloc((numChars+3) * sizeof(char));
-                strncpy(allCmds[numCmds], input + i - numChars, numChars + 1);
+                strncpy(allCmds[numCmds], input + i + 1 - numChars, numChars + 1);
                 allCmds[numCmds][numChars+1] = '\0';
                 numCmds++;
             }

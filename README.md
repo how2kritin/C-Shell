@@ -1,72 +1,315 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-24ddc0f5d75046c5622901739e7c5dd533143b0c8e959d652212380cedb1ea36.svg)](https://classroom.github.com/a/76mHqLr5)
 # Description
-To run the shell, do "make && ./a.out".
-To clean up residual executable and history files, run "make clean".
+**To run the shell, type:**
+```bash
+make && sudo ./shell
 ```
-main.c and headers.h -> General main function and the runCmd function, and header files required for the entire codebase, and also to handle Keyboard Interrupt signals.
-prompt.c and prompt.h -> For Specification 1 of Part A.
-Specification 2 of Part A is handled in main.c itself.
-warp.c and warp.h -> For Specification 3 of Part A.
-peek.c and peek.h -> For Specification 4 of Part A.
-pastevents.c and pastevents.h -> For Specification 5 of Part A.
-syscmds.c and syscmds.h -> For Specification 6 of Part A.
-bgHandler.c and bgHandler.h -> To handle background processes for Specification 6 of Part A; to handle activities for Specification 12 of Part B; and Ctrl-D for Specification 13 of Part B.
-proclore.c and proclore.h -> For Specification 7 of Part A.
-seek.c and seek.h -> For Specification 8 of Part A.
-Specifications 9, 10, 11 of Part B -> Handled in main.c itself.
-Specification 12 of Part B -> Handled in bgHandler.c and bgHandler.h.
-signals.c and signals.h -> For Specification 13 of Part B (except Ctrl-D, which has been handled by bgHandler.)
-fg_and_bg.c and fg_and_bg.h -> For Specification 14 of Part B
-neonate.c and neonate.h -> For Specification 15 of Part B
-iMan.c and iMan.h -> For Specification 16 of Part C.
+**Note: You are running the shell as sudo, in order to let readlink work on every file.  
+Also necessary to send signals to some system processes.**
+
+The directory in which the shell is run, is treated as the Home directory of the shell, and is represented by ~.  
+
+**To clean up executable and history files, run:**
+```bash
+make clean
+```
+---
+
+---
+
+# Features
+
+## Support for multiple commands
+Added support for multiple commands separated by ; or &. The latter runs the command as a background process, while the former is used to separate foreground commands.
+```
+<JohnDoe@SYS:~> a & b; c ; d   & e
+# a and d run in the background, while b, c and e run in the foreground.
 ```
 
-# Assumptions
-1. This shell was created on Arch Linux. There may be parts of code that could possibly break, if they are run on another distro of Linux. So, it is hereby assumed that whenever this code breaks on another Linux Distro, you will allow me to run this code on my own laptop.
-2. Shell will be run as sudo, so that readlink will never give a permissions issue. 
-3. If no previous warps are performed, then the first time the "warp -" command is run, ```OLDPWD not set``` is printed. It will keep being printed for as long as the ```OLDPWD``` env variable is not set (basically a char array in my shell).
-4. For peek -l -> Print everything exactly how Bash does it, apart from the Lexicographical Order. So, for a symlink, display name of file with the path of file that it is linked to, just like how bash does it.
-5. For peek -> Without the -l flag, display everything in a single line, separated by spaces. For clarification, refer to Q37 of the doubts document.
-6. For peek -> Coloring -> Refer to Q38 and Q41 of the doubts document. For the file to be treated as an executable, "User" should have 'x' perm. Symlinks are to be coloured cyan.
-7. For peek -> Padding is allowed.
-8. For peek -l -> For files not made in the current year, display their year of modification instead of time of modification.
-9. pastevents command stores history in .history.txt (hidden file). This file will never be overwritten by a testcase (according to TA's response in the doubts document).
-10. For all specifications (esp spec 6) -> There exist at most 512 args for any one command.
-11. There can be a maximum of 500 concurrent background processes.
-12. pastevents stores ALL commands (even erroneous ones) EXCEPT pastevents and its derivatives, but modify pastevents execute and store.
-13. Max length of any given command is 4096 bytes.
-14. Don't store commands with pastevents anywhere as a substring, except for pastevents execute -> modify and store.
-15. If pastevents execute is not given a valid argument, then it won't be stored.
-16. There will be atmost 512 commands given in one single line.
-17. For seek -e -> User must have 'r' perm for files and 'x' perm for directories when only a single file is found, else, display "Missing permissions for task!".
-18. Q88 of the doubts document -> I will not be storing "exit" in the pastevents whenever shell is exit.
-19. Q83 of the doubts document -> I will be printing the time taken for the ENTIRETY of the command given (including ;, & etc.,) and printing it in the next prompt, along with the entire command and its args.
-20. Q79 of the doubts document -> I will NOT be storing ANYTHING if pastevents execute <idx> has an invalid idx. If it is in a string separated by ; then I will just ignore that pastevents, and move onto copying the other strings. I will pretend that, that pastevents command never existed.
-21. Q75 of the doubts document -> For seek, in string matching: ```[VB] The given string should match a prefix of the file or folder.``` -> So, I will search for prefixes only, in seek.
-22. Q107 of the doubts document -> Will be printing total block size in terms of 512-byte chunks.
-23. In prompt; even if pastevents execute is present, I'll display the entire string that the user entered, not the modified string which is stored in pastevents.
-24. Q120 of the doubts document -> No need to handle " " cases specially/separately for execvp().
-25. RED colour messages -> ERROR, YELLOW colour messages -> WARNINGS.
-26. All errors are printed to stderr.
-27. proclore shows virtual memory size in BYTES. This can be read from /proc/pid/stat -> 23rd value.
-28. For seek and peek, any permutation of valid flags is acceptable, and each such flag can be repeated any number of times.
-29. No need to support ~, - etc. for Specification 6, since it wasn't mentioned that we have to.
-30. For iMan -> It is fine if some HTML tags seep through, for some man pages. It is also fine, if some tags that show up on the webpage aren't formatted correctly on the terminal.
-31. For activities -> We know that only background processes can exist, which might be running that are spawned by the shell. Any other process, if foreground, would've exited before we are able to access the shell again. So, for this reason, I need only print the background processes. However, do note that all processes, including foreground, are stored in it, but are removed as soon as they end. So, effectively, it works this way.
-32. Q188 of the doubts document -> For activities -> Any state that is NOT stopped ("T" in state in /proc) is considered to be running.
-33. No need to handle overflow errors for any numerical inputs.
-34. No need to handle extra args given after any command.
-35. For ping -> signal number can be negative, but I will make it positive and perform modulo accordingly.
-36. There won't be multiple input/output redirections, and all redirections will occur at the end of main command only. So, if that command is supposed to be run as background, then '&' will be put before the redirection.
-37. There can be a maximum of 511 pipes in a command.
-38. I assume that each opening apostrophe/quote (' or ") will always be followed by a closing apostrophe/quote.
-39. Apostrophes/Quotes (' or ") won't be used anywhere in user-defined commands. They will only be used in system commands.
-40. Multiple pipes of the form ```|||||``` are treated to be INVALID.
-41. Q216 of the doubts document -> I am prioritizing I/O redirection over piping.
-42. "~" will act as the home directory of the shell, only for SEEK and PEEK. For the rest, it may not work as expected.
-43. If there's an error in one command while redirecting I/O, when there's multiple commands separated by a ; or &, that one command will fail to execute, and the rest of the commands will execute normally.
-44. activities -> Only stores command name, but not arguments. Same goes for my background handler array.
-45. neonate -> Terminates only when an x is pressed. Won't terminate with Ctrl-C, Ctrl-Z or Ctrl-D.
-46. If there is an erroneous command in a pipeline, then that one command will fail, but the rest of the pipeline will execute normally. I am basically implementing what Bash does.
-47. Typing "exit" into the terminal will do exactly what pressing Ctrl-D does (kill all background processes, and exit the shell).
-    [//]: # (21. Q105 and Q116 of the doubts document -> Accounting for extra spaces everywhere. However, will be accounting for them in execvp&#40;&#41; commands aswell, so, <pre>"echo   "Lorem      Ipsum""</pre> will be printed as <pre>"Lorem Ipsum"</pre>, wherein, the spaces in between are gone, and the quotes are retained -> REDUNDANT!!)
+---
+
+## Support for piping and redirection
+Added support for piping and input/output redirection.  
+**Does NOT support multiple inputs and outputs (yet).**  
+
+### I/O Redirection:
+```
+>: Outputs to the filename following ">". Creates a new file if it doesn't exist, and overwrites the contents of the pre-existing file.
+>>: Similar to ">", creates a new file if it doesn't exist, but APPENDS the output to the file if it already exists.
+<: Reads input from the filename following "<". Returns an error saying "No such input file found!", if an input file with the given name doesn't exist.
+```
+
+### Piping:
+Passes information between commands. Takes an output from command on the left, and passes it as input to the command on the right.  
+Added support for any number of pipes.  
+Works for commands created by me, as well as other system commands.
+
+---
+
+## warp
+Similar to *cd* in Bash. Added support for “.”, “..”, “~”, and “-” just like in Bash.  
+Supports both relative and absolute paths, along with paths from the home directory.  
+Supports multiple arguments **unlike** cd, where each successive argument is executed sequentially from left to right.  
+If no arguments are given, then it warps into the home directory.
+
+### Input format:
+```
+warp <path1> <path2 inside path1> ...
+```
+
+### Example:
+```
+<JohnDoe@SYS:~> warp test
+/home/johndoe/test
+<JohnDoe@SYS:~/test> warp assignment
+/home/johndoe/test/assignment
+<JohnDoe@SYS:~/test/assignment> warp ~
+/home/johndoe
+<JohnDoe@SYS:~> warp -
+/home/johndoe/test/assignment
+<JohnDoe@SYS:~/test/assignment> warp .. tutorial
+/home/johndoe/test
+/home/johndoe/test/tutorial
+<JohnDoe@SYS:~/test/tutorial> warp ~/project
+/home/johndoe/project
+<JohnDoe@SYS:~/project>
+```
+
+---
+
+## peek
+
+Lists all the files and directories in the specified directory in lexicographic order. By default, doesn't show hidden files.
+Similar to warp, added support for “.”, “..”, “~” flags. Supports both relative and absolute paths.  
+If no arguments are given, it will peek at the current working directory.  
+
+### Input format:
+```
+peek <flags> <path>
+```
+
+### Flags:
+```
+-l: to display extra information about each file (similar to ls -l in Bash)
+-a: (to display hidden files, similar to ls -a in Bash).  
+Works even for flags of the form "-al", "-a -l", "-a" etc.
+```
+
+### Color coding of files:
+```
+Blue for directories
+Cyan for symbolic links
+Green for executables
+White for everything else
+```
+
+---
+
+## pastevents
+
+Similar to the **history** command in Bash.  
+Stores, and outputs upto the last 15 most recent command statements (including arguments) input to the shell.  
+Storage of these commands is persistent over different shell runs.  
+Doesn't store a command if it is exactly the same as the previously entered command.  
+Stores all statements, except commands that include **pastevents** or **pastevents purge**.  
+
+Supports 2 other sub-commands, apart from **pastevents**.  
+### pastevents purge
+Clears all the pastevents currently stored. This command is **NOT** stored in pastevents.  
+
+### pastevents execute \<index\>
+Executes the command at the specified position in pastevents (1-indexed, from most recent to oldest).  
+While being stored in pastevents, this command is resolved to be the same as the command at that position in pastevents.  
+So, this command is **NOT** stored if it matches the most recent command.
+
+#### Example:
+```
+<JohnDoe@SYS:~> pastevents # Assuming this is the first time the shell is run
+<JohnDoe@SYS:~> sleep 1
+<JohnDoe@SYS:~> sleep 2
+<JohnDoe@SYS:~> pastevents
+sleep 1
+sleep 2
+<JohnDoe@SYS:~> sleep 2
+sleep 1
+sleep 2  # sleep 2 is not repeated
+<JohnDoe@SYS:~> sleep 1; pastevents
+sleep 1
+sleep 2
+<JohnDoe@SYS:~> pastevents # Notice how 'sleep 1; pastevents' is not considered as it contains the pastevents command
+sleep 1
+sleep 2
+<JohnDoe@SYS:~> sleep 3; pastevents execute 1
+<JohnDoe@SYS:~> sleep 3; sleep 2
+<JohnDoe@SYS:~> sleep 3
+<JohnDoe@SYS:~> sleep 3; sleep 2
+<JohnDoe@SYS:~> pastevents
+sleep 1
+sleep 2
+sleep 3; sleep 2 # Only output once as 'sleep 3; pastevents execute 1' is stored as 'sleep 3; sleep 2'
+sleep 3
+sleep 3; sleep 2
+```
+
+---
+
+## proclore
+
+Used to obtain information regarding a process.  
+Prints the information of the shell if an argument is missing.  
+
+### Input format:
+```
+proclore <pid>
+```
+
+### Information printed:
+```
+pid (Process ID)
+Process Status (R/R+/S/S+/Z)
+Process Group (Process Group ID)
+Virtual Memory (in bytes)
+Executable Path (relative to the Home directory of the shell, if valid)
+```
+
+### Process Status
+```
+R/R+: Running
+S/S+: Sleeping in an Interruptible Wait
+Z: Zombie. 
++ signifies that it is a foreground process.
+Absence of a + signifies that it is a background process.
+```
+
+---
+
+## seek
+Looks for a file/directory in the specified target directory (or current working directory, if no directory is specified).  
+Returns a list of relative paths (from the target directory) of all matching files/directories **which have the specified prefix.**  
+If read/execute permissions are missing for the directory, or read permissions are missing for the file, then depending on the task, this command will display a warning and proceed if it can with the rest of the files.  
+Prints "**No match found!**" if no 
+
+### Input Format:
+```
+seek <flags> <search_prefix> <target_directory>
+```
+
+### Flags:
+```
+-d: Looks only for directories (ignores files even if the prefix matches).
+-f: Looks only for files (ignores directories even if the prefix matches).
+-e: Effective only when a single file or a single directory with the name is found.
+If only one file (and no directories) are found, it prints the contents of the file onto the shell.
+If only one directory (and no files) are found, it changes the current working directory to that directory.
+Works with -d and -f flags as well.
+
+Works with flags of the form "-de", "-d -e", "-f" etc.
+NOTE: -d and -f flags can't be used at the same time.
+```
+
+### Color coding:
+```
+Blue for directories
+Green for all other files
+```
+
+---
+
+## activities
+Prints a list of all the processes currently running, that were spawned by my shell in lexicographic order.  
+**Contains each process of the form:**
+```
+[pid]: [command name] - [state]
+```
+
+The state of the process is either Stopped, or Running (any process that hasn't stopped is considered to be running).
+
+---
+
+## Signals and Keyboard Interrupts
+ping command is used to send signals to processes.  
+Takes the signal number with modulo 32, before checking which signal it belongs to.  
+A list of the standard signals can be found over at [man signal](https://man7.org/linux/man-pages/man7/signal.7.html).
+
+### Input Format:
+```
+ping <pid> <signal_number>
+```
+
+### Supported Keyboard Interrupts:
+```
+Ctrl+C: Interrupt any currently running foreground process by sending it the SIGINT signal.
+Ctrl+D: Log out of the shell (after killing all processes). Does nothing to the actual terminal.
+Ctrl+Z: Push the (if any) running foreground process to the background, and change its state from "Running" to "Stopped".
+
+Note that Ctrl+C and Ctrl+Z do nothing to the shell if no foreground process is running.
+```
+
+---
+
+## fg and bg
+### fg \<pid\>
+Brings the running or stopped process with the corresponding pid to the foreground, and hands it control of the terminal.  
+Changes the state of the stopped process to _"Running"_.
+
+### bg \<pid\>
+Changes the state of a stopped background process to _"Running"_ (in the background).
+
+---
+
+## neonate
+Prints the process ID of the most recently created process on the system, and prints this pid once every <time_in_seconds> seconds until the key **'x'** is pressed.  
+No other key press or keyboard interrupt can stop this. Only pressing **'x'** can stop this process.
+
+### Input Format:
+```
+neonate -n <time_in_seconds>
+```
+
+---
+
+## iMan
+Fetches _man_ pages from the internet (from [man.he.net](http://man.he.net/)).  
+**Requires an active internet connection.**
+
+**Note:** You may find rogue HTML tags and character entities in the output. The HTML obtained from the man page has not been post-processed, and as such, these may occur.
+
+---
+
+## Other system commands
+Implemented support to run other system commands which haven't been explicitly implemented by me, using _execvp()_ system call.  
+These can be run as either foreground or background processes.
+
+### Foreground Processes
+**SUPPORTED BY COMMANDS THAT WERE IMPLEMENTED BY ME, AS WELL AS OTHER SYSTEM COMMANDS.**  
+Shell waits for the process to complete and regains control afterward.  
+Control of the terminal is handed over to this process for the time being, while it is running.  
+Time taken by the foreground process and the entire command run will be printed in the next prompt, if the process takes > 2 seconds to run (round down to an integer).
+
+#### Example:
+```
+<JohnDoe@SYS:~> sleep 5
+# sleeps for 5 seconds
+<JohnDoe@SYS:~ sleep : 5s>
+```
+
+### Background Processes
+**COMMANDS THAT WERE IMPLEMENTED BY ME ARE NOT SUPPOSED TO BE RUN AS BACKGROUND PROCESSES. ONLY FOR SYSTEM COMMANDS.**  
+Any command invoked with "&" is treated as a background command. The shell will spawn that process, but doesn't hand the control of the terminal to it.  
+What this means is that the shell will keep taking other user commands.  
+Shell prints the PID of the background process as soon as the process spawns, and once the process is done executing, will print the process name as well as the exit status of the process (along with its PID).
+
+#### Example:
+```
+<JohnDoe@SYS:~> sleep 10 &
+13027
+<JohnDoe@SYS:~> sleep 20 &                       # After 10 seconds
+Sleep exited normally (13027)
+13054
+<JohnDoe@SYS:~> echo "Lorem Ipsum"               # After 20 seconds
+Sleep exited normally (13054)
+Lorem Ipsum
+```
+
+---
+
+---
