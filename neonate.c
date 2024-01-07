@@ -87,7 +87,7 @@ void enableRawMode() {
     struct termios raw = orig_termios;
     raw.c_lflag &= ~(ECHO | ICANON | IEXTEN | ISIG); // Turn off Ctrl-C, Ctrl-Z and Ctrl-V signals.
     raw.c_iflag &= ~(ICRNL | IXON); // Turn off Ctrl-S which pauses output from being sent. (Ctrl-Q resumes output), and fix Ctrl-M from being read as 13 (carriage return, not \n -> 10).
-    raw.c_oflag &= ~(OPOST); // Prevent all post-processing of output (like turning "\n" into "\r\n"). This is just convention.
+//    raw.c_oflag &= ~(OPOST); // Prevent all post-processing of output (like turning "\n" into "\r\n"). This is just convention.
     raw.c_cc[VMIN] = 1; // Min number of bytes of input needed before read() can return.
 //    raw.c_cc[VTIME] = 0; // TIMEOUT FOR READ().
     if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw) == -1) die("tcsetattr");

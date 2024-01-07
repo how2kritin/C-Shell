@@ -26,19 +26,30 @@ char delimiters[4] = " \t\n\v";
 
 // Process multiple commands separated by ';' or '&' (SPEC 2)
 int splitCmds(const char input[], char* allCmds[]){
+    // Do not split the commands, if the commands are enclosed by quotes (either ' or ").
     int numCmds = 0, numChars = 0;
+
     for(int i = 0; input[i] != '\0'; i++){
-        while(input[i] != '\0' && input[i] != ';' && input[i] != '&') i++, numChars++;
-        allCmds[numCmds] = malloc((numChars+3)*sizeof(char));
-        if(input[i] == '&') {
-            strncpy(allCmds[numCmds], input + i - numChars, numChars);
-            if(input[i-1] != ' ' && input[i-1] != '\t') allCmds[numCmds][numChars] = ' ', allCmds[numCmds][numChars+1] = '&';
-            else allCmds[numCmds][numChars] = '&', allCmds[numCmds][numChars+1] = '\0';
-            allCmds[numCmds][numChars+2] = '\0';
+        while(input[i] != '\0' && input[i] != ';' && input[i] != '&' && input[i] != '\"' && input[i] != '\'') i++, numChars++;
+        if(input[i] == '\0' || input[i] == ';' || input[i] == '&'){
+            allCmds[numCmds] = malloc((numChars+3)*sizeof(char));
+            if(input[i] == '&') {
+                strncpy(allCmds[numCmds], input + i - numChars, numChars);
+                if(input[i-1] != ' ' && input[i-1] != '\t') allCmds[numCmds][numChars] = ' ', allCmds[numCmds][numChars+1] = '&';
+                else allCmds[numCmds][numChars] = '&', allCmds[numCmds][numChars+1] = '\0';
+                allCmds[numCmds][numChars+2] = '\0';
+            }
+            else if(input[i] == ';' || input[i] == '\0') {
+                strncpy(allCmds[numCmds], input + i - numChars, numChars);
+                allCmds[numCmds][numChars] = '\0';
+            }
         }
-        else if(input[i] == ';' || input[i] == '\0') {
-            strncpy(allCmds[numCmds], input + i - numChars, numChars);
-            allCmds[numCmds][numChars] = '\0';
+        else { // if input[i] is either " or ', search ahead until the closing " or ', and copy it over without splitting the & and ;.
+            do i++, numChars++; // Need to do this once before.
+            while(input[i] != '\0' && input[i] != '\"' && input[i] != '\'');
+            allCmds[numCmds] = malloc((numChars+3) * sizeof(char));
+            strncpy(allCmds[numCmds], input + i - numChars, numChars + 1);
+            allCmds[numCmds][numChars+1] = '\0';
         }
         numChars = 0, numCmds++;
     }
