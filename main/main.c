@@ -22,7 +22,7 @@
 
 bool isForegroundRunning = false;
 char homeDirAbsPath[PATH_MAX] = {};
-char delimiters[4] = " \t\n\v";
+char delimiters[3] = " \t\n";
 
 // Process multiple commands separated by ';' or '&' (SPEC 2)
 int splitCmds(const char input[], char* allCmds[]){
@@ -73,13 +73,39 @@ void runCmd(int* childPid, char* token1){
         return;
     }
 
+    // Process " " and ' ' separately:
+    char* apostropheStart = strstr(token1, "\'");
+    while(apostropheStart) {// Key: Map space to \a, tab to \f, > to \r, < to \v, | to \b. So, >> is \r\r.
+        int endApostropheIdx = 1;
+        for (int i = 1; apostropheStart[i] != '\0' && apostropheStart[i] != '\''; i++, endApostropheIdx++) {
+            if (apostropheStart[i] == ' ') apostropheStart[i] = '\a';
+            else if (apostropheStart[i] == '\t') apostropheStart[i] = '\f';
+            else if (apostropheStart[i] == '>') apostropheStart[i] = '\r';
+            else if(apostropheStart[i] == '<') apostropheStart[i] = '\v';
+            else if(apostropheStart[i] == '|') apostropheStart[i] = '\b';
+        }
+        apostropheStart = strstr(apostropheStart+endApostropheIdx+1, "\'");
+    }
+    char* quotesStart = strstr(token1, "\"");
+    while(quotesStart) {// Key: Map space to \a, tab to \f, > to \r, < to \v, | to \b. So, >> is \r\r.
+        int endQuoteIdx = 1;
+        for (int i = 1; quotesStart[i] != '\0' && quotesStart[i] != '\"'; i++, endQuoteIdx++) {
+            if (quotesStart[i] == ' ') quotesStart[i] = '\a';
+            else if (quotesStart[i] == '\t') quotesStart[i] = '\f';
+            else if (quotesStart[i] == '>') quotesStart[i] = '\r';
+            else if(quotesStart[i] == '<') quotesStart[i] = '\v';
+            else if(quotesStart[i] == '|') quotesStart[i] = '\b';
+        }
+        quotesStart = strstr(quotesStart+endQuoteIdx+1, "\"");
+    }
+
     // Handle invalid pipe cases:
     for(int i = 0; token1[i] != '\0'; i++) if(token1[i] != ' ' && token1[i] != '\t' && token1[i] != '\n') { // Check if a pipe occurs at the start.
         if(token1[i] == '|') {
             fprintf(stderr, BRED "ERROR: Pipe occurring at the start of command, with nothing to pipe input FROM!\n" CRESET);
             return;
         }
-        else break;
+        break;
     }
 
     char* lastPipe = strrchr(token1, '|');
@@ -238,23 +264,6 @@ void runCmd(int* childPid, char* token1){
 
         // Now, copy over everything except the > and < and subsequent info, to a new token so that we can use it to run command.
         for (int i = 0; token[i] != '\0' && token[i] != '>' && token[i] != '<'; i++) newCmd[i] = token[i];
-        // Process " " and ' ' separately:
-        char* apostropheStart = strstr(newCmd, "\'");
-        while(apostropheStart) {// Basically, if I find \a -> there has to be a space there. If I find \f -> there has to be a tab there.
-            for (int i = 1; apostropheStart[i] != '\0' && apostropheStart[i] != '\''; i++) {
-                if (apostropheStart[i] == ' ') apostropheStart[i] = '\a';
-                else if (apostropheStart[i] == '\t') apostropheStart[i] = '\f';
-            }
-            apostropheStart = strstr(apostropheStart+1, "\'");
-        }
-        char* quotesStart = strstr(newCmd, "\"");
-        while(quotesStart) {// Basically, if I find \a -> there has to be a space there. If I find \f -> there has to be a tab there.
-            for (int i = 1; quotesStart[i] != '\0' && quotesStart[i] != '\"'; i++) {
-                if (quotesStart[i] == ' ') quotesStart[i] = '\a';
-                else if (quotesStart[i] == '\t') quotesStart[i] = '\f';
-            }
-            quotesStart = strstr(quotesStart+1, "\"");
-        }
         newToken = strtok(newCmd, delimiters);
 
         // Handle actual command execution here:

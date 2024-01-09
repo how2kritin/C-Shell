@@ -70,7 +70,7 @@
 // Extern declaration of global variables: Reference -> https://stackoverflow.com/questions/1433204/how-do-i-use-extern-to-share-variables-between-source-files
 extern char homeDirAbsPath[PATH_MAX];
 extern char prevDir[PATH_MAX];
-extern char delimiters[4];
+extern char delimiters[3];
 extern bool isForegroundRunning;
 extern int currNumBGProcesses;
 

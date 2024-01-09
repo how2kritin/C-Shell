@@ -46,6 +46,9 @@ int processSysCmd(char* token){
         for(int j = 0; token[j] != '\0'; j++) {
             if(token[j] == '\a') token[j] = ' ';
             else if(token[j] == '\f') token[j] = '\t';
+            else if(token[j] == '\r') token[j] = '>';
+            else if(token[j] == '\v') token[j] = '<';
+            else if(token[j] == '\b') token[j] = '|';
             else if(token[j] == '\"' || token[j] == '\''){ // Pop that char.
                 for(int k = j; token[k] != '\0'; k++) token[k] = token[k+1];
                 j--; // to stay at same value of j for next iteration.
