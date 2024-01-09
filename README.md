@@ -1,4 +1,15 @@
-# Description
+# Pre-requisites
+
+* gcc
+* make
+
+Please install these with a package manager of your choice (usually the one that comes with your Linux distro).
+
+---
+
+---
+
+# Using the Shell
 **To run the shell, type:**
 ```bash
 make && sudo ./shell
@@ -15,6 +26,16 @@ make clean
 ---
 
 ---
+
+# Contents
+
+* ### [Features](#features)
+#### [Multiple Command Support](#support-for-multiple-commands) | #### [Piping and Redirection Support](#support-for-piping-and-redirection) | #### [warp](#warp) | #### [peek](#peek)
+#### [pastevents](#pastevents) | #### [proclore](#proclore) | #### [seek](#seek) | #### [activities](#activities) | #### [Signals and Keyboard Interrupts](#signals-and-keyboard-interrupts) | #### [fg and bg](#fg-and-bg)
+#### [neonate](#neonate) | #### [Other system Commands](#other-system-commands)
+* ### [Improvements on Project Requirements](#improvements-on-project-requirements)
+* ### [Assumptions](#assumptions)
+* ### [Limitations](#limitations)
 
 # Features
 
@@ -236,13 +257,11 @@ ping <pid> <signal_number>
 ```
 
 ### Supported Keyboard Interrupts:
-```
-Ctrl+C: Interrupt any currently running foreground process by sending it the SIGINT signal.
-Ctrl+D: Log out of the shell (after killing all processes). Does nothing to the actual terminal.
-Ctrl+Z: Push the (if any) running foreground process to the background, and change its state from "Running" to "Stopped".
+* **Ctrl+C:** Interrupt any currently running foreground process by sending it the SIGINT signal.
+* **Ctrl+D:** Log out of the shell (after killing all processes). Does nothing to the actual terminal.
+* **Ctrl+Z:** Push the (if any) running foreground process to the background, and change its state from "Running" to "Stopped".
 
-Note that Ctrl+C and Ctrl+Z do nothing to the shell if no foreground process is running.
-```
+**Note that Ctrl+C and Ctrl+Z do nothing to the shell if no foreground process is running.**
 
 ---
 
@@ -313,3 +332,49 @@ Lorem Ipsum
 ---
 
 ---
+
+## Improvements on Project Requirements
+
+* pastevents execute \<index\> has been made to work such that, no matter however large a previous executed command may be, its output will always be properly redirected if this command is used anywhere as a part of an even larger command.  
+For example,
+```
+<JohnDoe@SYS:~> echo "hi" ; echo "bye"
+hi
+bye
+<JohnDoe@SYS:~> pastevents execute 1 > a.txt
+<JohnDoe@SYS:~>
+
+Checking a.txt, we find:
+hi
+bye
+```
+* exit command has been implemented to gracefully exit from the shell, and free all memory which has been dynamically allocated.
+* Any permutation of flags are allowed in peek and seek, but invalid flags and invalid permutations (such as using -d and -f simultaneously in seek) will result in an error.  
+However, something like ```peek -laal``` is perfectly valid.
+* Processed arguments in single quotes (' ') and double quotes (" ") separately and appropriately, so, something like ```echo "a && b"``` or ```echo 'a && b'``` will print ```a && b```, and something like ```sleep "5"```
+will work the same way as ```sleep 5```.
+What this also means is that everything inside quotes is treated as a single argument, and no further processing (such as treating the statement to the right of, say, a redirection operator, as the input/output file) will be done.
+
+---
+
+---
+
+## Assumptions
+
+* The shell will be run as a superuser, in order to ensure that commands such as ```proclore``` won't fail on processes owned by the system.
+* ~ in the shell is the directory in which the shell was started. This cannot be changed for the duration of the shell being run.
+It is **NOT** the home directory of your computer.
+
+---
+
+---
+
+## Limitations
+
+* Commands that were implemented by me do not support background execution. For such commands, "&" is treated as an argument.
+* Currently do not support whitespaces in paths of files/directories, due to the way I tokenize my inputs with whitespace as a delimiter.
+
+--
+
+--
+
