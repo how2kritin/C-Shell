@@ -1,5 +1,5 @@
 CFLAGS = -Wall -Wextra -g
-SOURCE_FILES = main.c prompt.c warp.c peek.c pastevents.c syscmds.c proclore.c seek.c bgHandler.c signals.c neonate.c iMan.c fg_and_bg.c
+SOURCE_FILES = main/main.c main/prompt.c custom-commands/warp.c custom-commands/peek.c custom-commands/pastevents.c main/syscmds.c custom-commands/proclore.c custom-commands/seek.c main/bgHandler.c custom-commands/signals.c custom-commands/neonate.c networking/iMan.c custom-commands/fg_and_bg.c
 OUTPUT_FILENAME = shell
 
 all:

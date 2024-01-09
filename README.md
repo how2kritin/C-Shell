@@ -30,9 +30,9 @@ make clean
 # Contents
 
 * ### [Features](#features)
-#### [Multiple Command Support](#support-for-multiple-commands) | #### [Piping and Redirection Support](#support-for-piping-and-redirection) | #### [warp](#warp) | #### [peek](#peek)
-#### [pastevents](#pastevents) | #### [proclore](#proclore) | #### [seek](#seek) | #### [activities](#activities) | #### [Signals and Keyboard Interrupts](#signals-and-keyboard-interrupts) | #### [fg and bg](#fg-and-bg)
-#### [neonate](#neonate) | #### [Other system Commands](#other-system-commands)
+#### [Multiple Command Support](#support-for-multiple-commands) | [Piping and Redirection Support](#support-for-piping-and-redirection) | [warp](#warp) | [peek](#peek)
+#### [pastevents](#pastevents) | [proclore](#proclore) | [seek](#seek) | [activities](#activities) | [Signals and Keyboard Interrupts](#signals-and-keyboard-interrupts) | [fg and bg](#fg-and-bg)
+#### [neonate](#neonate) | [Other system Commands](#other-system-commands)
 * ### [Improvements on Project Requirements](#improvements-on-project-requirements)
 * ### [Assumptions](#assumptions)
 * ### [Limitations](#limitations)
@@ -374,7 +374,7 @@ It is **NOT** the home directory of your computer.
 * Commands that were implemented by me do not support background execution. For such commands, "&" is treated as an argument.
 * Currently do not support whitespaces in paths of files/directories, due to the way I tokenize my inputs with whitespace as a delimiter.
 
---
+---
 
---
+---
 

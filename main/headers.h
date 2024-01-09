@@ -23,19 +23,19 @@
 #include <termios.h>
 #include <ctype.h>
 
-// User-made headers
+// Custom-made headers
 #include "prompt.h"
-#include "warp.h"
-#include "peek.h"
-#include "pastevents.h"
+#include "../custom-commands/warp.h"
+#include "../custom-commands/peek.h"
+#include "../custom-commands/pastevents.h"
 #include "syscmds.h"
-#include "proclore.h"
-#include "seek.h"
+#include "../custom-commands/proclore.h"
+#include "../custom-commands/seek.h"
 #include "bgHandler.h"
-#include "signals.h"
-#include "iMan.h"
-#include "neonate.h"
-#include "fg_and_bg.h"
+#include "../custom-commands/signals.h"
+#include "../networking/iMan.h"
+#include "../custom-commands/neonate.h"
+#include "../custom-commands/fg_and_bg.h"
 
 // General global macro definitions and constants:
 #define MAX_CONCURRENT_BG_PROCESSES 500

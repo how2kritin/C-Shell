@@ -1,4 +1,4 @@
-#include "headers.h"
+#include "../main/headers.h"
 
 // Working: To add a new command to history, check if there already exist 15 commands. If no, then add it. To do this, do some file processing (read all the lines into an array, and remove
 // the topmost (first) line. Add new line at end, and write lines 2 to 16 to your history file.

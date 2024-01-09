@@ -1,4 +1,4 @@
-#include "headers.h"
+#include "../main/headers.h"
 
 // Note: The foreground process handler code is the same as that in syscmds, with a small change wherein I add the SIGCONT signal.
 

@@ -1,4 +1,4 @@
-#include "headers.h"
+#include "../main/headers.h"
 
 // Global variables to store most recent state.
 char mostRecentFoundPath[4096] = {};

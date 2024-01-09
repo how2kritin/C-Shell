@@ -1,4 +1,4 @@
-#include "headers.h"
+#include "../main/headers.h"
 
 // References: To get the status of a process -> https://linux.die.net/man/2/waitpid AND man waitpid
 // To get process group -> https://www.ibm.com/docs/en/zos/2.1.0?topic=functions-getpgid-get-process-group-id
